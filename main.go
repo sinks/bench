@@ -4,29 +4,33 @@ import (
 	"fmt"
 	"github.com/sinks/bench/command"
 	"os"
-	"time"
 )
 
-const dir_time_layout = "20060102"
-
 var commands = []command.Command{
-	{[]string{"new"}, NewHandler},
+	{[]string{"new"}, command.NewHandler},
+	{[]string{"add"}, command.AddHandler},
 	{[]string{"status"}, StatusHandler},
-	{[]string{"log"}, LogHandler},
+	{[]string{"commit"}, CommitHandler},
+	{[]string{"history"}, HistoryHandler},
+	{[]string{"checkout"}, CheckoutHandler},
 }
 
-func NewHandler() {
-	fmt.Println("new day started")
+func CheckoutHandler() {
+	fmt.Println("")
+}
+
+func HistoryHandler() {
+	fmt.Println("")
 }
 
 func StatusHandler() {
-	fmt.Println("today not started")
+	fmt.Println("bench not created")
 	fmt.Println("")
 	fmt.Println("run: bench new")
 }
 
-func LogHandler() {
-	fmt.Println("")
+func CommitHandler() {
+	fmt.Println("log handler")
 }
 
 func Commands(command_name string) (*command.Command, error) {
@@ -57,14 +61,5 @@ func Usage() {
 	fmt.Println("The most commonly used commands are:")
 	fmt.Println("   new      start a new day")
 	fmt.Println("   status   show current times")
-	fmt.Println("   log      create a new entry")
-}
-
-func new_day(base_path string) {
-	time_now := time.Now()
-	path := base_path + time_now.Format(dir_time_layout)
-	err := os.MkdirAll(path, os.ModeDir)
-	if err != nil {
-		fmt.Println("Unable to create path")
-	}
+	fmt.Println("   commit   create a new entry")
 }
