@@ -10,24 +10,49 @@ import (
 	"time"
 )
 
-type NewCommand Command
+const entry_time_format = "01-02 15:04"
 
-func NewAddCommand() *Command {
+type AddCommand struct {
+}
+
+func (ac *AddCommand) Handle() {
 	var db *sql.DB
 	before_handlers := []func() error{
 		InitCheckHandler,
-		DbSetupHandler(db),
+		func() error {
+			var err error
+			db, err = DbSetupHandler()
+			return err
+		},
 	}
-	handler := AddHandler(db)
-	after_handlers := []func() error{}
 
-	command := &Command{
-		[]string{"add"},
-		handler,
-		before_handlers,
-		after_handlers,
+	TriggerHandlers(before_handlers)
+	var entry *bench.Entry
+	var err error
+	if entry, err = AddHandler(db); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	return command
+	after_handlers := []func() error{
+		func() error {
+			fmt.Println(entry.Time.Format(entry_time_format)+":", entry.Role, entry.Project, entry.Description)
+			return nil
+		},
+	}
+	TriggerHandlers(after_handlers)
+}
+
+func TriggerHandlers(handlers []func() error) {
+	for _, f := range handlers {
+		if err := f(); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+}
+
+func (ac *AddCommand) Names() []string {
+	return []string{"add"}
 }
 
 type AddOptions struct {
@@ -36,42 +61,36 @@ type AddOptions struct {
 	Description string
 }
 
-func AddHandler(db *sql.DB) func() error {
-	return func() error {
-		DbSetupHandler(db)
-		fmt.Println(db)
-		add_options := AddOptions{}
-		flagSet := SetupFlags(&add_options)
-		flagSet.Parse(os.Args[2:])
-		add_options.Description = strings.Join(flagSet.Args(), " ")
-		var tx *sql.Tx
-		var err error
-		fmt.Println(db)
-		if tx, err = db.Begin(); err != nil {
-			return err
-		}
-		saveEntry(tx, add_options)
-		if err = tx.Commit(); err != nil {
-			return err
-		}
-		return nil
+func AddHandler(db *sql.DB) (*bench.Entry, error) {
+	add_options := AddOptions{}
+	flagSet := SetupFlags(&add_options)
+	flagSet.Parse(os.Args[2:])
+	add_options.Description = strings.Join(flagSet.Args(), " ")
+	var tx *sql.Tx
+	var err error
+	if tx, err = db.Begin(); err != nil {
+		return nil, err
 	}
+	var entry *bench.Entry
+	entry, err = saveEntry(tx, add_options)
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return entry, nil
 }
 
-func saveEntry(tx *sql.Tx, add_options AddOptions) error {
+func saveEntry(tx *sql.Tx, add_options AddOptions) (*bench.Entry, error) {
 	entry := &bench.Entry{
 		time.Now(),
 		add_options.Role,
 		add_options.Project,
 		add_options.Description,
 	}
-
 	err := entry.Save(tx)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	return entry, nil
 }
 
 func SetupFlags(add_options *AddOptions) *flag.FlagSet {

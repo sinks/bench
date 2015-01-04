@@ -6,19 +6,28 @@ import (
 	"os"
 )
 
-var commands = []*command.Command{
-	command.NewInitCommand(),
-	command.NewAddCommand(),
+var commands = []command.Command{
+	&command.InitCommand{},
+	&command.AddCommand{},
 	//	command.NewStatusCommand(),
 }
 
-func Commands(command_name string) (*command.Command, error) {
+func Commands(command_name string) (command.Command, error) {
 	for _, command := range commands {
-		if command.HandlesName(command_name) {
+		if handlesName(command_name, command.Names()) {
 			return command, nil
 		}
 	}
 	return nil, command.CommandNotValidError(command_name)
+}
+
+func handlesName(command string, names []string) bool {
+	for _, name := range names {
+		if name == command {
+			return true
+		}
+	}
+	return false
 }
 
 func main() {

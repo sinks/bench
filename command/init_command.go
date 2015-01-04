@@ -7,18 +7,18 @@ import (
 	"os"
 )
 
-func NewInitCommand() *Command {
+type InitCommand struct {
+}
+
+func (ic *InitCommand) Handle() {
 	var db *sql.DB
-	before_handlers := []func() error{}
-	handler := func() error { return InitHandler(db) }
+	InitHandler(db)
 	after_handlers := []func() error{success}
-	command := &Command{
-		[]string{"init"},
-		handler,
-		before_handlers,
-		after_handlers,
-	}
-	return command
+	TriggerHandlers(after_handlers)
+}
+
+func (ic *InitCommand) Names() []string {
+	return []string{"init"}
 }
 
 const dir_perms = 0755

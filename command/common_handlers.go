@@ -22,17 +22,16 @@ func InitCheckHandler() error {
 	return nil
 }
 
-func DbSetupHandler(db *sql.DB) func() error {
-	return func() error {
-		var err error
-		if !bench.DbExists() {
-			return error_db_not_setup
-		}
-		db, err = sql.Open("sqlite3", bench.DbPath())
-		if err != nil {
-			return err
-		}
-		err = db.Ping()
-		return err
+func DbSetupHandler() (*sql.DB, error) {
+	var err error
+	var db *sql.DB
+	if !bench.DbExists() {
+		return nil, error_db_not_setup
 	}
+	db, err = sql.Open("sqlite3", bench.DbPath())
+	if err != nil {
+		return nil, err
+	}
+	err = db.Ping()
+	return db, err
 }
