@@ -4,16 +4,13 @@ import (
 	"os"
 )
 
-func BenchPath() string {
-	return "./.bench"
-}
-
-func DbPath() string {
-	return "./.bench/bench.db"
-}
+const (
+	BenchDir    = "./.bench/"
+	BenchDBPath = BenchDir + "bench.db"
+)
 
 func BenchDirExists() bool {
-	_, err := os.Stat(BenchPath())
+	_, err := os.Stat(BenchDir)
 	if os.IsNotExist(err) {
 		return false
 	}
@@ -21,7 +18,7 @@ func BenchDirExists() bool {
 }
 
 func DbExists() bool {
-	_, err := os.Stat(DbPath())
+	_, err := os.Stat(BenchDBPath)
 	if os.IsNotExist(err) {
 		return false
 	}

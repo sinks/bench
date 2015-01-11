@@ -9,7 +9,7 @@ import (
 var commands = []command.Command{
 	&command.InitCommand{},
 	&command.AddCommand{},
-	//	command.NewStatusCommand(),
+	&command.StatusCommand{},
 }
 
 func Commands(command_name string) (command.Command, error) {

@@ -20,28 +20,7 @@ CREATE TABLE IF NOT EXISTS entries (
 );
 `
 
-func CreateDatabase(db *sql.DB) error {
-	var err error
-	if err = db.Ping(); err != nil {
-		return err
-	}
-	var tx *sql.Tx
-	if tx, err = db.Begin(); err != nil {
-		return err
-	}
-	if err = schemaCreate(tx); err != nil {
-		if rb_err := tx.Rollback(); rb_err != nil {
-			return rb_err
-		}
-		return err
-	}
-	if err = tx.Commit(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func schemaCreate(tx *sql.Tx) error {
+func schemaRun(tx *sql.Tx) error {
 	_, err := tx.Exec(document_schema)
 	if err != nil {
 		return err
@@ -50,5 +29,5 @@ func schemaCreate(tx *sql.Tx) error {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
 }

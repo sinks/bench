@@ -1,64 +1,37 @@
 package command
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/sinks/bench/bench"
 	"os"
 )
 
+const (
+	dir_perms = 0755
+)
+
 type InitCommand struct {
+	db bench.BenchDatabase
 }
 
-func (ic *InitCommand) Handle() {
-	var db *sql.DB
-	InitHandler(db)
-	after_handlers := []func() error{success}
-	TriggerHandlers(after_handlers)
+func (self *InitCommand) Handle() {
+	if err := createBenchDir(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if err := self.db.Create(); err != nil {
+	}
+	fmt.Println("bench created")
 }
 
-func (ic *InitCommand) Names() []string {
+func (self *InitCommand) Names() []string {
 	return []string{"init"}
 }
 
-const dir_perms = 0755
-
-type InitCommandCreatePathError string
-
-func (s InitCommandCreatePathError) Error() string {
-	return fmt.Sprintf("failed to create %s", string(s))
-}
-
-func InitHandler(db *sql.DB) error {
-	err := initBenchDir(bench.BenchPath())
+func createBenchDir() error {
+	err := os.MkdirAll(bench.BenchDir, dir_perms)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create %s", bench.BenchDir)
 	}
-	err = initBenchDatabase(db)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func initBenchDir(base_path string) error {
-	err := os.MkdirAll(base_path, dir_perms)
-	if err != nil {
-		return InitCommandCreatePathError(base_path)
-	}
-	return nil
-}
-
-func initBenchDatabase(db *sql.DB) error {
-	var err error
-	db, err = sql.Open("sqlite3", bench.DbPath())
-	if err != nil {
-		return err
-	}
-	return bench.CreateDatabase(db)
-}
-
-func success() error {
-	fmt.Println("bench created")
 	return nil
 }

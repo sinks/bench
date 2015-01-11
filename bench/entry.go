@@ -14,7 +14,7 @@ type Entry struct {
 	Description string    `json:"description"`
 }
 
-func (e *Entry) Save(tx *sql.Tx) error {
+func (e *Entry) SqlInsert(tx *sql.Tx) error {
 	_, err := tx.Exec(insert_sql, e.Time, e.Role, e.Project, e.Description)
 	if err != nil {
 		return err
