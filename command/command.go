@@ -6,6 +6,7 @@ import (
 
 type Command interface {
 	Handle()
+	Usage()
 	Names() []string
 }
 

@@ -5,7 +5,14 @@ import (
 	"time"
 )
 
-const insert_sql = "INSERT INTO entries (time, role, project, description) VALUES (?, ?, ?, ?);"
+const (
+	insert_sql       = "INSERT INTO entries (time, role, project, description) VALUES (?, ?, ?, ?);"
+	time_between_sql = "SELECT id, time, role, project, description FROM ENTRIES WHERE time >= ? AND time <= ?;"
+)
+
+const (
+	sqlite_time_format = "2006-01-02 15:04:05.0"
+)
 
 type Entry struct {
 	Time        time.Time `json:"time"`
@@ -15,15 +22,29 @@ type Entry struct {
 }
 
 func (e *Entry) SqlInsert(tx *sql.Tx) error {
-	_, err := tx.Exec(insert_sql, e.Time, e.Role, e.Project, e.Description)
+	time_utc := e.Time.UTC()
+	_, err := tx.Exec(insert_sql, time_utc, e.Role, e.Project, e.Description)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type ByEntryTimes []Entry
-
-func (b ByEntryTimes) Len() int           { return len(b) }
-func (b ByEntryTimes) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
-func (b ByEntryTimes) Less(i, j int) bool { return b[i].Time.After(b[j].Time) }
+func EntriesBetween(db *BenchDatabase, start time.Time, end time.Time) ([]Entry, error) {
+	rows, err := db.Select(time_between_sql, start, end)
+	if err != nil {
+		return nil, err
+	}
+	var results []Entry
+	for rows.Next() {
+		var result Entry
+		var id int64
+		var utc_time time.Time
+		err = rows.Scan(&id, &utc_time, &result.Role, &result.Project, &result.Description)
+		result.Time = utc_time.Local()
+		if err == nil {
+			results = append(results, result)
+		}
+	}
+	return results, nil
+}

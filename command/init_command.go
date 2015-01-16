@@ -28,6 +28,9 @@ func (self *InitCommand) Names() []string {
 	return []string{"init"}
 }
 
+func (self InitCommand) Usage() {
+}
+
 func createBenchDir() error {
 	err := os.MkdirAll(bench.BenchDir, dir_perms)
 	if err != nil {

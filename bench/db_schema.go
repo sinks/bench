@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS document (
 var entries_schema = `
 CREATE TABLE IF NOT EXISTS entries (
 	id INTEGER PRIMARY KEY,
-	time INTEGER,
+	time datetime,
 	role STRING,
 	project STRING,
 	description STRING

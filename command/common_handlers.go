@@ -9,7 +9,7 @@ var error_init_not_run = errors.New(`bench not setup
 
 run: bench init`)
 
-func InitCheckHandler() error {
+func InitCheck() error {
 	if !bench.BenchDirExists() {
 		return error_init_not_run
 	}
