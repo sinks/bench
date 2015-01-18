@@ -1,7 +1,14 @@
 package command
 
 import (
-	"fmt"
+	"github.com/sinks/bench/bench"
+	"github.com/sinks/bench/command/add_cmd"
+	"github.com/sinks/bench/command/init_cmd"
+	"github.com/sinks/bench/command/status_cmd"
+)
+
+var (
+	db = bench.BenchDatabase{}
 )
 
 type Command interface {
@@ -10,8 +17,14 @@ type Command interface {
 	Names() []string
 }
 
-type CommandNotValidError string
+func NewInitCommand() Command {
+	return &init_cmd.Command{DB: db}
+}
 
-func (c CommandNotValidError) Error() string {
-	return fmt.Sprintf("Command %s not found", string(c))
+func NewAddCommand() Command {
+	return &add_cmd.Command{DB: db}
+}
+
+func NewStatusCommand() Command {
+	return &status_cmd.Command{DB: db}
 }

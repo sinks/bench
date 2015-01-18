@@ -1,15 +1,16 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/sinks/bench/command"
 	"os"
 )
 
 var commands = []command.Command{
-	&command.InitCommand{},
-	&command.AddCommand{},
-	&command.StatusCommand{},
+	command.NewInitCommand(),
+	command.NewAddCommand(),
+	command.NewStatusCommand(),
 }
 
 func Commands(command_name string) (command.Command, error) {
@@ -18,7 +19,7 @@ func Commands(command_name string) (command.Command, error) {
 			return command, nil
 		}
 	}
-	return nil, command.CommandNotValidError(command_name)
+	return nil, errors.New("command not valid")
 }
 
 func handlesName(command string, names []string) bool {

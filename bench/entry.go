@@ -2,6 +2,7 @@ package bench
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -11,7 +12,8 @@ const (
 )
 
 const (
-	sqlite_time_format = "2006-01-02 15:04:05.0"
+	entry_time_format = "2006-01-02 15:04"
+	entry_format      = "%s: %s@%s - %s"
 )
 
 type Entry struct {
@@ -35,6 +37,7 @@ func EntriesBetween(db *BenchDatabase, start time.Time, end time.Time) ([]Entry,
 	if err != nil {
 		return nil, err
 	}
+
 	var results []Entry
 	for rows.Next() {
 		var result Entry
@@ -47,4 +50,14 @@ func EntriesBetween(db *BenchDatabase, start time.Time, end time.Time) ([]Entry,
 		}
 	}
 	return results, nil
+}
+
+func (entry Entry) String() string {
+	return fmt.Sprintf(
+		entry_format,
+		entry.Time.Format(entry_time_format),
+		entry.Role,
+		entry.Project,
+		entry.Description,
+	)
 }
