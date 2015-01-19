@@ -16,7 +16,7 @@ type Command struct {
 const (
 	display_time_format = "15:04:05"
 	display_day_format  = "Monday 2006-01-02"
-	summary_format      = "worked for %d:%d"
+	summary_format      = "worked for %.f:%2.f\n"
 )
 
 func (self *Command) Handle() {
@@ -36,7 +36,7 @@ func (self *Command) Handle() {
 		showEntries(results)
 		duration := time_now.Sub(results[0].Time)
 		fmt.Println("")
-		fmt.Printf(summary_format, math.Floor(duration.Hours()), math.Floor(duration.Minutes()))
+		fmt.Printf(summary_format, math.Floor(duration.Hours()), math.Floor(math.Mod(duration.Minutes(), 60)))
 	}
 }
 
